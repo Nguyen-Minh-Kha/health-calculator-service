@@ -65,14 +65,14 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_92EB7DB041F3421B9588A7E3B19F437E }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_7B4FEA4C73B14F80B5F41ACAA77954DD }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D5A59D4AA5C44CF3891C26380193BC39 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_048d4bb0-e3c4-46ba-b6c7-867e9ac9ded0 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_b7b023b8-7c32-4c02-92a6-c8cdaa1d189c}}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_048d4bb0-e3c4-46ba-b6c7-867e9ac9ded0 }}
 
       - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'app-25'
+          app-name: 'bmi-bmr-calculator'
           slot-name: 'Production'
           
