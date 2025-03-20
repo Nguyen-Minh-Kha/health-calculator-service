@@ -1,29 +1,57 @@
 import unittest
-from utils import calculate_monthly_payment, calculate_total_cost
+import json
+from app import app
+from health_utils import calculate_bmi, calculate_bmr
 
-class TestLoanCalculatorUtils(unittest.TestCase):
-    def test_calculate_monthly_payment_with_interest(self):
-        loan_amount = 10000
-        duration_years = 5
-        annual_interest_rate = 5
-        expected_payment = 188.71
-        result = calculate_monthly_payment(loan_amount, duration_years, annual_interest_rate)
-        self.assertAlmostEqual(result, expected_payment, places=2)
+class TestHealthUtils(unittest.TestCase):
+    
+    def setUp(self):
+        self.app = app.test_client()
+        self.app.testing = True
+    
+    def test_calculate_bmi(self):
+        # Will fail if BMI formula is incorrect: weight(kg)/(height(m))^2
+        # Common error: using wrong units or incorrect formula structure
+        self.assertAlmostEqual(calculate_bmi(1.75, 70), 22.86, places=2)
+        self.assertAlmostEqual(calculate_bmi(1.80, 80), 24.69, places=2)
+        self.assertAlmostEqual(calculate_bmi(1.60, 50), 19.53, places=2)
+    
+    def test_calculate_bmr_male(self):
+        # Will fail if male BMR formula is incorrect
+        # Common error: height should be in cm here (175cm), not meters
+        # Formula: 88.362 + (13.397 × weight) + (4.799 × height) - (5.677 × age)
+        self.assertAlmostEqual(calculate_bmr(175, 70, 30, 'male'), 1695.67, places=2)
+    
+    def test_calculate_bmr_female(self):
+        # Will fail if female BMR formula is incorrect
+        # Common error: using male formula or incorrect coefficients
+        # Formula: 447.593 + (9.247 × weight) + (3.098 × height) - (4.330 × age)
+        self.assertAlmostEqual(calculate_bmr(165, 55, 25, 'female'), 1359.10, places=2)
+    
+    def test_bmi_endpoint(self):
+        # Will fail if:
+        # 1. /bmi endpoint doesn't exist or doesn't accept POST requests
+        # 2. JSON parsing is incorrect
+        # 3. BMI category logic differs (under 18.5: Underweight, 18.5-25: Normal, etc.)
+        response = self.app.post('/bmi',
+                                json={'height': 1.75, 'weight': 70},
+                                content_type='application/json')
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertAlmostEqual(data['bmi'], 22.86, places=2)
+        self.assertEqual(data['category'], 'Normal weight')
 
-    def test_calculate_monthly_payment_no_interest(self):
-        loan_amount = 10000
-        duration_years = 5
-        annual_interest_rate = 0
-        expected_payment = 166.67
-        result = calculate_monthly_payment(loan_amount, duration_years, annual_interest_rate)
-        self.assertAlmostEqual(result, expected_payment, places=2)
-
-    def test_calculate_total_cost(self):
-        monthly_payment = 188.71
-        duration_years = 5
-        expected_total_cost = 11322.6
-        result = calculate_total_cost(monthly_payment, duration_years)
-        self.assertAlmostEqual(result, expected_total_cost, places=2)
+    def test_bmr_endpoint_male(self):
+        # Will fail if:
+        # 1. /bmr endpoint doesn't exist or doesn't accept POST requests
+        # 2. Response format is different than expected
+        # 3. Gender parameter handling is case-sensitive or different than expected
+        response = self.app.post('/bmr',
+                                json={'height': 175, 'weight': 70, 'age': 30, 'gender': 'male'},
+                                content_type='application/json')
+        data = json.loads(response.data.decode())
+        self.assertEqual(response.status_code, 200)
+        self.assertAlmostEqual(data['bmr'], 1695.67, places=2)
 
 if __name__ == '__main__':
     unittest.main()
