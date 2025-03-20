@@ -85,4 +85,3 @@ This template was created by **Ali Mokh** and is intended as an educational reso
 ## License and Usage
 
 This project template is open to use by anyone and may be freely adapted for personal or professional projects. If you use this template as part of teaching materials or educational content, please cite **Ali Mokh** as the original author.
-
